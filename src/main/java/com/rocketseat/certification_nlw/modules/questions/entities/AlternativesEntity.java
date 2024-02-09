@@ -1,4 +1,4 @@
-package com.rocketseat.certification_nlw.modules.students.questions.entities;
+package com.rocketseat.certification_nlw.modules.questions.entities;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -10,12 +10,14 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity(name = "alternatives")
 public class AlternativesEntity {
     @Id

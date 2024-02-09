@@ -1,4 +1,4 @@
-package com.rocketseat.certification_nlw.modules.students.questions.entities;
+package com.rocketseat.certification_nlw.modules.questions.entities;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -14,12 +14,14 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToMany;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Entity(name = "questions")
 public class QuestionsEntity {
        @Id

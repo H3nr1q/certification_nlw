@@ -1,4 +1,4 @@
-package com.rocketseat.certification_nlw.modules.students.questions.controllers;
+package com.rocketseat.certification_nlw.modules.questions.controllers;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import lombok.Builder;
+import com.rocketseat.certification_nlw.modules.questions.dto.AlternativesResultDTO;
+import com.rocketseat.certification_nlw.modules.questions.dto.QuestionResultDTO;
+import com.rocketseat.certification_nlw.modules.questions.entities.AlternativesEntity;
+import com.rocketseat.certification_nlw.modules.questions.entities.QuestionsEntity;
+import com.rocketseat.certification_nlw.modules.questions.repositories.QuestionsRepository;
 
-import com.rocketseat.certification_nlw.modules.students.questions.dto.AlternativesResultDTO;
-import com.rocketseat.certification_nlw.modules.students.questions.dto.QuestionResultDTO;
-import com.rocketseat.certification_nlw.modules.students.questions.entities.AlternativesEntity;
-import com.rocketseat.certification_nlw.modules.students.questions.entities.QuestionsEntity;
-import com.rocketseat.certification_nlw.modules.students.questions.repositories.QuestionsRepository;
+import lombok.Builder;
 
 @RestController
 @RequestMapping("/questions")
