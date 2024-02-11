@@ -1,7 +1,9 @@
 package com.rocketseat.certification_nlw.modules.students.useCases;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.rocketseat.certification_nlw.modules.questions.entities.QuestionsEntity;
 import com.rocketseat.certification_nlw.modules.questions.repositories.QuestionsRepository;
 import com.rocketseat.certification_nlw.modules.students.dto.StudentCertificationAnswersDTO;
+import com.rocketseat.certification_nlw.modules.students.dto.VerifyHasCertificatonDTO;
 import com.rocketseat.certification_nlw.modules.students.entities.AnswersCertificationsEntity;
 import com.rocketseat.certification_nlw.modules.students.entities.CertificationStudentEntity;
 import com.rocketseat.certification_nlw.modules.students.entities.StudentEntity;
@@ -26,10 +29,22 @@ public class StudentCertificationAnswersUseCase {
 
     @Autowired
     private CertificationStudentRepository certificationRepository;
+
+    @Autowired
+    private VerifyIfHasCertificationUseCase verifyIfHasCertificationUseCase;
     
-    public CertificationStudentEntity execute(StudentCertificationAnswersDTO studentCertificationAnswersDTO){
+    public CertificationStudentEntity execute(StudentCertificationAnswersDTO studentCertificationAnswersDTO) throws Exception{
+
+        var hasCertificatons = this.verifyIfHasCertificationUseCase.execute(new VerifyHasCertificatonDTO(studentCertificationAnswersDTO.getEmail(), studentCertificationAnswersDTO.getTechnology()));
         
+        if(hasCertificatons){
+            throw new Exception("Você já tirou sua certificação");
+        }
+
         List<QuestionsEntity> questionsEntity = questionsRepository.findByTechnology(studentCertificationAnswersDTO.getTechnology());
+        List<AnswersCertificationsEntity> answersCertifications = new ArrayList<>();
+
+        AtomicInteger correctAnswers = new AtomicInteger(0);
 
         studentCertificationAnswersDTO.getQuestionsAnswers()
             .stream().forEach(questionsAnswers -> {
@@ -41,14 +56,23 @@ public class StudentCertificationAnswersUseCase {
 
                 if (findCorrectAlternative.getId().equals(questionsAnswers.getAlternativeID())){
                     questionsAnswers.setCorrect(true);
+                    correctAnswers.getAndIncrement();
                 }else{
                     questionsAnswers.setCorrect(false);
                 }
+
+                var answersCertificationsEntity = AnswersCertificationsEntity.builder()
+                .answerIID(questionsAnswers.getAlternativeID())
+                .questionsID(questionsAnswers.getQuestionID())
+                .isCorrect(questionsAnswers.isCorrect())
+                .build();
+
+                answersCertifications.add(answersCertificationsEntity);
         });
 
         var student = studentRepository.findByEmail(studentCertificationAnswersDTO.getEmail());
         UUID studentID;
-        if(!student.isEmpty()){
+        if(student.isEmpty()){
             var studentCreated = StudentEntity.builder().email(studentCertificationAnswersDTO.getEmail()).build();
             studentCreated = studentRepository.save(studentCreated);
             studentID = studentCreated.getId();
@@ -57,15 +81,23 @@ public class StudentCertificationAnswersUseCase {
             studentID = student.get().getId();
         }
 
-        List<AnswersCertificationsEntity> answersCertifications = new ArrayList<>();
 
-        CertificationStudentEntity certificationStudentEntity; = CertificationStudentEntity.builder()
+        CertificationStudentEntity certificationStudentEntity = CertificationStudentEntity.builder()
             .technology(studentCertificationAnswersDTO.getTechnology())
             .studentID(studentID)
-            .answersCertificationsEntity(answersCertifications)
-            .buil();
+            .grade(correctAnswers.get())
+            .build();
 
-            var certificationStudentCreated = certificationRepository.save(certificationStudentEntity);
+        var certificationStudentCreated = certificationRepository.save(certificationStudentEntity);
+
+        answersCertifications.stream().forEach(answersCertification -> {
+            answersCertification.setCertificationID(certificationStudentEntity.getId());
+            answersCertification.setCertificationStudentEntity(certificationStudentEntity);
+        });
+
+        certificationStudentEntity.setAnswersCertificationsEntity(answersCertifications);
+
+        certificationRepository.save(certificationStudentEntity);
 
         return certificationStudentCreated;
 

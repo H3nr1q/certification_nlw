@@ -19,7 +19,7 @@ public class CreateSeed {
         dataSourceDriver.setDriverClassName("org.postgresql.Driver");
         dataSourceDriver.setUrl("jdbc:postgresql://localhost:5432/pg_nlw");
         dataSourceDriver.setUsername("postgres");
-        dataSourceDriver.setPassword("pentabr0610");
+        dataSourceDriver.setPassword("123");
 
         CreateSeed createSeed = new CreateSeed(dataSourceDriver);
         createSeed.run(args);
